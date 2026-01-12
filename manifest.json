@@ -1,0 +1,31 @@
+{
+  "system_name": "rehydrate-system",
+  "description": "Automated context loader with PowerShell/Bash scripts to restore operational state and verify system integrity.",
+  "version": "1.0.0",
+  "scripts": [
+    {
+      "name": "restore_state_windows",
+      "platform": "windows",
+      "path": "scripts/powershell/restore_state.ps1",
+      "parameters": [
+        {"name": "Environment", "type": "string", "required": true, "description": "Target environment (e.g., Production, Staging)"},
+        {"name": "VerifyIntegrity", "type": "boolean", "required": false, "description": "Perform system integrity verification"}
+      ]
+    },
+    {
+      "name": "restore_state_linux",
+      "platform": "linux",
+      "path": "scripts/bash/restore_state.sh",
+      "parameters": [
+        {"name": "environment", "type": "string", "required": true, "description": "Target environment (e.g., production, staging)"},
+        {"name": "verify", "type": "boolean", "required": false, "description": "Perform system integrity verification"}
+      ]
+    }
+  ],
+  "integrations": [
+    {
+      "system": "orchestrator-system",
+      "description": "Provides rehydration routines and parameters for orchestrated recovery."
+    }
+  ]
+}
