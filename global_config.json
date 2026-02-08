@@ -1,0 +1,23 @@
+{
+  "default_environment": "development",
+  "verify_integrity_by_default": true,
+  "log_level": "INFO",
+  "max_retry_attempts": 3,
+  "timeout_seconds": 300,
+  "supported_platforms": [
+    "windows",
+    "linux",
+    "darwin"
+  ],
+  "environment_aliases": {
+    "prod": "production",
+    "dev": "development",
+    "stage": "staging"
+  },
+  "global_settings": {
+    "enable_state_tracking": true,
+    "enable_history": true,
+    "max_history_entries": 100,
+    "state_persistence": true
+  }
+}
