@@ -1,7 +1,41 @@
 {
   "system_name": "rehydrate-system",
   "description": "Automated context loader with PowerShell/Bash scripts to restore operational state and verify system integrity.",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "global_rehydration": {
+    "enabled": true,
+    "coordinator": "global_rehydrate.py",
+    "description": "Cross-platform global rehydration coordinator that provides unified interface for all rehydration operations",
+    "features": [
+      "Cross-platform compatibility",
+      "Global state management",
+      "Rehydration history tracking",
+      "Unified CLI interface",
+      "Automatic platform detection"
+    ],
+    "commands": [
+      {
+        "name": "rehydrate",
+        "description": "Perform global rehydration for specified environment",
+        "usage": "python3 global_rehydrate.py rehydrate --environment=<env> [--verify] [--force]"
+      },
+      {
+        "name": "status",
+        "description": "Get current global rehydration status",
+        "usage": "python3 global_rehydrate.py status"
+      },
+      {
+        "name": "history",
+        "description": "View rehydration history",
+        "usage": "python3 global_rehydrate.py history [--limit=N]"
+      },
+      {
+        "name": "reset",
+        "description": "Reset global rehydration state",
+        "usage": "python3 global_rehydrate.py reset --confirm"
+      }
+    ]
+  },
   "scripts": [
     {
       "name": "restore_state_windows",
@@ -26,6 +60,10 @@
     {
       "system": "orchestrator-system",
       "description": "Provides rehydration routines and parameters for orchestrated recovery."
+    },
+    {
+      "system": "global-rehydration-coordinator",
+      "description": "Unified cross-platform interface for global rehydration operations with state management and history tracking."
     }
   ]
 }

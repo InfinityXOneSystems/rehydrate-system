@@ -2,21 +2,77 @@
 
 ## 1. Introduction
 
-The Rehydrate System is a crucial component of the control-plane, responsible for restoring a system's operational state from a known baseline. It provides a standardized and automated way to load context, apply configurations, and verify system integrity. This document outlines the architecture of the Rehydrate System.
+The Rehydrate System is a crucial component of the control-plane, responsible for restoring a system's operational state from a known baseline. It provides a standardized and automated way to load context, apply configurations, and verify system integrity. 
+
+**Version 2.0** introduces the **Global Rehydration System** - a unified, cross-platform coordinator that provides centralized state management, history tracking, and a single interface for all rehydration operations across any platform.
+
+This document outlines the architecture of both the platform-specific scripts and the new global rehydration coordinator.
 
 ## 2. Core Components
 
 The system is composed of the following key components:
 
-- **Manifest (`manifest.json`)**: A JSON file that describes the rehydration capabilities of the system. It serves as a service contract for the Orchestrator System, detailing the available scripts, their platforms, and parameters.
+### 2.1 Global Rehydration Coordinator
 
-- **Scripts**: The core logic of the Rehydrate System, implemented as PowerShell scripts for Windows and Bash scripts for Linux/Unix environments. These scripts perform the actual rehydration tasks.
+**NEW in v2.0** - The `global_rehydrate.py` module provides:
 
-- **Orchestrator System Integration**: The Rehydrate System is designed to be invoked by the Orchestrator System. The orchestrator reads the `manifest.json` to understand how to trigger rehydration processes for different systems and environments.
+- **Unified Interface**: Single CLI/API for all rehydration operations across platforms
+- **State Management**: Persistent tracking of rehydration state in `global_state.json`
+- **Configuration Management**: Centralized configuration via `global_config.json`
+- **Platform Detection**: Automatic detection and selection of appropriate platform scripts
+- **History Tracking**: Complete audit trail of all rehydration operations
+- **Status Monitoring**: Real-time status queries for external systems
+
+### 2.2 Platform-Specific Scripts
+
+- **PowerShell Scripts** (`scripts/powershell/`): Windows-specific rehydration logic
+- **Bash Scripts** (`scripts/bash/`): Linux/Unix rehydration logic
+
+These scripts perform the actual platform-specific rehydration tasks and are invoked by the global coordinator.
+
+### 2.3 Manifest
+
+**Manifest (`manifest.json`)**: A JSON file that describes the rehydration capabilities of the system. It serves as a service contract for the Orchestrator System, detailing:
+- Available platform-specific scripts and their parameters
+- Global rehydration coordinator capabilities
+- Integration points for external systems
+
+### 2.4 State and Configuration Files
+
+- **`global_state.json`**: Auto-generated file tracking system status, active environments, and rehydration history
+- **`global_config.json`**: User-configurable settings for global rehydration behavior
 
 ## 3. Workflow
 
-The rehydration process follows this general workflow:
+### 3.1 Global Rehydration Workflow (NEW - Recommended)
+
+The global rehydration process follows this workflow:
+
+1. **User/System Request**: A user or external system requests rehydration via the global coordinator CLI or API
+
+2. **State Check**: The coordinator checks `global_state.json` to determine if the environment is already hydrated
+
+3. **Configuration Loading**: Loads settings from `global_config.json` for default values and preferences
+
+4. **Platform Detection**: Automatically detects the current platform (Windows/Linux/Darwin)
+
+5. **Script Selection**: Reads `manifest.json` to identify the appropriate platform-specific script
+
+6. **Pre-execution Validation**: Verifies script existence and required parameters
+
+7. **Script Execution**: Invokes the platform-specific script with appropriate parameters
+
+8. **State Tracking**: Records rehydration attempt with timestamp, environment, and status
+
+9. **Result Processing**: Captures output, determines success/failure, and updates global state
+
+10. **History Recording**: Appends operation to rehydration history in `global_state.json`
+
+11. **Response**: Returns result to caller with success status and details
+
+### 3.2 Legacy Platform-Specific Workflow
+
+The original rehydration process (still supported) follows this workflow:
 
 1. **Trigger**: The Orchestrator System, based on its own logic or a user request, decides to rehydrate a target system.
 
@@ -56,3 +112,67 @@ The Rehydrate System is designed to be extensible. New rehydration routines can 
 2. Adding a corresponding entry to the `manifest.json` file to expose the new script and its parameters to the Orchestrator System.
 
 This modular design allows the Rehydrate System to evolve and adapt to new systems and recovery scenarios over time.
+
+## 6. Global State Management
+
+The global rehydration coordinator maintains persistent state in `global_state.json`:
+
+### State Schema
+
+```json
+{
+  "last_rehydration": "ISO8601 timestamp",
+  "system_status": "uninitialized|hydrated|error",
+  "active_environments": ["env1", "env2"],
+  "rehydration_history": [
+    {
+      "timestamp": "ISO8601 timestamp",
+      "environment": "production",
+      "platform": "linux",
+      "verify_integrity": true,
+      "status": "success|failed|error",
+      "returncode": 0,
+      "output": "script output"
+    }
+  ]
+}
+```
+
+### State Benefits
+
+- **Idempotency**: Prevents redundant rehydration operations
+- **Audit Trail**: Complete history for compliance and debugging
+- **Status Monitoring**: External systems can query current state
+- **Recovery**: Failed operations can be identified and retried
+- **Coordination**: Multiple systems can coordinate via shared state
+
+## 7. Integration Patterns
+
+### 7.1 Python Integration
+
+```python
+from global_rehydrate import GlobalRehydrationSystem
+
+grs = GlobalRehydrationSystem()
+result = grs.rehydrate(environment="production", verify_integrity=True)
+if result["success"]:
+    print("Rehydration successful")
+```
+
+### 7.2 CLI Integration
+
+```bash
+python3 global_rehydrate.py rehydrate --environment=production --verify
+```
+
+### 7.3 State Monitoring
+
+```python
+import json
+
+with open('global_state.json', 'r') as f:
+    state = json.load(f)
+    
+if state['system_status'] == 'hydrated':
+    print(f"System is hydrated for: {state['active_environments']}")
+```
