@@ -147,6 +147,10 @@ This state file enables:
 - Recovery from failures
 - Status monitoring by external systems
 
+## Examples
+
+For detailed usage examples, see [docs/usage-examples.md](docs/usage-examples.md).
+
 ## Contributing
 
 Contributions are welcome! Please refer to the `CONTRIBUTING.md` (to be created) for guidelines.
